@@ -26,9 +26,9 @@ module.exports = {
     );
 
     try {
-      await queueEmbed.react("⬅️");
-      await queueEmbed.react("⏹");
-      await queueEmbed.react("➡️");
+      for (const emoji of ["⬅️", "⏹", "➡️"]) {
+        await queueEmbed.react(emoji);
+      }
     } catch (error) {
       console.error(error);
       message.channel.send(error.message).catch(console.error);
@@ -40,26 +40,20 @@ module.exports = {
 
     collector.on("collect", async (reaction, user) => {
       try {
-        if (reaction.emoji.name === "➡️") {
-          if (currentPage < embeds.length - 1) {
-            currentPage++;
-            queueEmbed.edit(
-              i18n.__mf("queue.currentPage", { page: currentPage + 1, length: embeds.length }),
-              embeds[currentPage]
-            );
-          }
-        } else if (reaction.emoji.name === "⬅️") {
-          if (currentPage !== 0) {
-            --currentPage;
-            queueEmbed.edit(
-              i18n.__mf("queue.currentPage", { page: currentPage + 1, length: embeds.length }),
-              embeds[currentPage]
-            );
-          }
+        if (reaction.emoji.name === "➡️" && currentPage < embeds.length - 1) {
+          currentPage++;
+        } else if (reaction.emoji.name === "⬅️" && currentPage !== 0) {
+          --currentPage;
         } else {
           collector.stop();
           reaction.message.reactions.removeAll();
         }
+
+        queueEmbed.edit(
+          `**${i18n.__mf("queue.currentPage")} ${currentPage + 1}/${embeds.length}**`,
+          embeds[currentPage]
+        );
+
         await reaction.users.remove(message.author.id);
       } catch (error) {
         console.error(error);
@@ -70,22 +64,19 @@ module.exports = {
 };
 
 function generateQueueEmbed(message, queue) {
-  let embeds = [];
-  let k = 10;
+  const embeds = [];
+  const itemsPerPage = 10;
 
-  for (let i = 0; i < queue.length; i += 10) {
-    const current = queue.slice(i, k);
-    let j = i;
-    k += 10;
-
-    const info = current.map((track) => `${++j} - [${track.title}](${track.url})`).join("\n");
+  for (let i = 0; i < queue.length; i += itemsPerPage) {
+    const current = queue.slice(i, i + itemsPerPage);
+    const info = current.map((track, index) => `${i + index + 1} - [${track.title}](${track.url})`).join("\n");
 
     const embed = new MessageEmbed()
       .setTitle(i18n.__("queue.embedTitle"))
       .setThumbnail(message.guild.iconURL())
       .setColor("#F8AA2A")
       .setDescription(
-        i18n.__mf("queue.embedCurrentSong", { title: queue[0].title, url: queue[0].url, info: info })
+        i18n.__mf("queue.embedCurrentSong", { title: queue[0].title, url: queue[0].url, info })
       )
       .setTimestamp();
     embeds.push(embed);
@@ -93,8 +84,3 @@ function generateQueueEmbed(message, queue) {
 
   return embeds;
 }
-
-
-
-
-

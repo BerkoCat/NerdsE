@@ -84,16 +84,38 @@ module.exports = {
       });
     dispatcher.setVolumeLogarithmic(queue.volume / 100);
 
+    function formatDuration(duration) {
+      const seconds = duration % 60;
+      const minutes = Math.floor((duration / 60) % 60);
+      const hours = Math.floor(duration / 3600);
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+      } else if (seconds > 0) {
+        return `${seconds}s`;
+      } else {
+        return "Live";
+      }
+    }
+    
     try {
       var playingMessage = await queue.textChannel.send(
         new MessageEmbed()
-        .setTitle("Now Playing")
-        .setURL(`${song.url}`)
-        .setThumbnail(message.author.displayAvatarURL({ format: "png" }))
-        .setDescription(i18n.__mf("play.startedPlaying", { title: song.title}))
-        .setFooter(`Requested by ${message.author.username}`)
-        .setColor("RANDOM")
-        .setTimestamp()
+          .setTitle("Now Playing")
+          .setURL(`${song.url}`)
+          .setThumbnail(message.author.displayAvatarURL({ format: "png" }))
+          .setDescription(
+            i18n.__mf("play.startedPlaying", { title: song.title })
+          )
+          .addField("Duration", formatDuration(song.duration), true)
+          .addField("Requested by", message.author.username, true)
+          .addField("Volume", `${queue.volume}%`, true)
+          .addField("Loop", queue.loop ? i18n.__("common.on") : i18n.__("common.off"), true)
+          .setFooter(`Requested by ${message.author.username}`)
+          .setColor("#3498DB")
+          .setTimestamp()
       );
       await playingMessage.react("⏭");
       await playingMessage.react("⏯");

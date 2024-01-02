@@ -8,17 +8,17 @@ module.exports = {
   name: "invite",
   description: i18n.__('invite.description'),
   execute(message, args) {
-    var permissions = 70282305;
+    const permissions = 70282305;
 
-    let invite1 = new MessageEmbed()
-      .setTitle(`**Here is the Invite Link **`)
+    const inviteEmbed = new MessageEmbed()
+      .setTitle("**Invite Me to Your Server!**")
       .setDescription(
-        `**Then what are you waiting for? Invite me today!** \n\n [Invite Link](https://discord.com/oauth2/authorize?client_id={client_id}&permissions=${permissions}&scope=bot)`
+        "You can invite me to your server by clicking the link below:\n\n" +
+        `[**Invite Link**](https://discord.com/oauth2/authorize?client_id=908921338280943666&permissions=8&scope=bot)`
       )
-      .setURL(
-        `https://discord.com/oauth2/authorize?client_id={client_id}&permissions=${permissions}&scope=bot`
-      )
-      .setColor("RANDOM");
-    return message.channel.send(invite1);
+      .setColor("RANDOM")
+      .setFooter("Thank you for inviting me!");
+
+    return message.channel.send(inviteEmbed);
   }
 };

@@ -1,0 +1,2 @@
+nlanguage = "nodejs"
+run = "npm start"

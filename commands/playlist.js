@@ -99,10 +99,10 @@ module.exports = {
     serverQueue ? serverQueue.songs.push(...newSongs) : queueConstruct.songs.push(...newSongs);
 
     let playlistEmbed = new MessageEmbed()
-      .setTitle(`${playlist.title}`)
-      .setDescription(newSongs.map((song, index) => `${index + 1}. ${song.title}`))
+      .setTitle(`**${playlist.title}** 🎶`)
+      .setDescription(newSongs.map((song, index) => `**${index + 1}.** ${song.title}`))
       .setURL(playlist.url)
-      .setColor("#F8AA2A")
+      .setColor("#3498DB")
       .setTimestamp();
 
     if (playlistEmbed.description.length >= 2048)

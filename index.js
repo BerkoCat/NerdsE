@@ -1,17 +1,17 @@
-/**
- * Module Imports
- */
 const { Client, Collection } = require("discord.js");
 const { readdirSync } = require("fs");
 const { join } = require("path");
-const { TOKEN, PREFIX, LOCALE } = require("./util/EvobotUtil");
+const { TOKEN, PREFIX } = require("./util/EvobotUtil");
 const path = require("path");
 const i18n = require("i18n");
 
-const client = new Client({ 
+const client = new Client({
   disableMentions: "everyone",
   restTimeOffset: 0
 });
+
+// Map to store server prefixes
+const serverPrefixes = new Map();
 
 client.login(TOKEN);
 client.commands = new Collection();
@@ -27,31 +27,32 @@ i18n.configure({
   objectNotation: true,
   register: global,
 
-  logWarnFn: function (msg) {
-    console.log("warn", msg);
-  },
-
-  logErrorFn: function (msg) {
-    console.log("error", msg);
-  },
-
-  missingKeyFn: function (locale, value) {
-    return value;
-  },
-
-  mustacheConfig: {
-    tags: ["{{", "}}"],
-    disable: false
-  }
+  logWarnFn: (msg) => console.log("warn", msg),
+  logErrorFn: (msg) => console.log("error", msg),
+  missingKeyFn: (locale, value) => value,
+  mustacheConfig: { tags: ["{{", "}}"], disable: false }
 });
 
 /**
  * Client Events
  */
 client.on("ready", () => {
-  console.log(`${client.user.username} is ready!!`);
-  client.user.setActivity(`${PREFIX}help`, { type: "LISTENING" });
+  console.log(`${client.user.username} is ready!![Meaning of no error]`);
+  const statuses = [
+    `${PREFIX}help, I Love You Guys!`,
+    `${PREFIX}help, Imagine Music`,
+    "NerdsE's Music BOT!",
+    "NerdsE's Experiment",
+    "Dannnn Wake Up",
+  ];
+
+  let index = 0;
+  setInterval(() => {
+    client.user.setActivity(statuses[index], { type: "PLAYING" });
+    index = (index + 1) % statuses.length;
+  }, 9000);
 });
+
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
 
@@ -60,54 +61,36 @@ client.on("error", console.error);
  */
 const commandFiles = readdirSync(join(__dirname, "commands")).filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
-  const command = require(join(__dirname, "commands", `${file}`));
+  const command = require(join(__dirname, "commands", file));
   client.commands.set(command.name, command);
 }
 
 client.on("message", async (message) => {
-  if (message.author.bot) return;
+  // Check if the message is from a guild (server)
   if (!message.guild) return;
 
-  const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(PREFIX)})\\s*`);
-  if (!prefixRegex.test(message.content)) return;
+  // Check if the bot was mentioned
+  if (message.mentions.has(client.user)) {
+    const guildPrefix = serverPrefixes.get(message.guild.id) || PREFIX;
+    return message.reply(`Hello <:emoji_name:1188128983234125925>, what can I help you? My prefix is ${guildPrefix}`);
+  }
 
-  const [, matchedPrefix] = message.content.match(prefixRegex);
+  // Retrieve the server prefix from the map, or use the default prefix
+  const guildPrefix = serverPrefixes.get(message.guild.id) || PREFIX;
 
-  const args = message.content.slice(matchedPrefix.length).trim().split(/ +/);
+  // Check if the message starts with the server prefix
+  if (!message.content.startsWith(guildPrefix)) return;
+
+  // Parse the command and arguments
+  const args = message.content.slice(guildPrefix.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
 
-  const command =
-    client.commands.get(commandName) ||
-    client.commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName));
+  // Check if the command exists
+  if (!client.commands.has(commandName)) return;
 
-  if (!command) return;
-
-  if (!cooldowns.has(command.name)) {
-    cooldowns.set(command.name, new Collection());
-  }
-
-  const now = Date.now();
-  const timestamps = cooldowns.get(command.name);
-  const cooldownAmount = (command.cooldown || 1) * 1000;
-
-  if (timestamps.has(message.author.id)) {
-    const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
-
-    if (now < expirationTime) {
-      const timeLeft = (expirationTime - now) / 1000;
-      return message.reply(
-        i18n.__mf("common.cooldownMessage", { time: timeLeft.toFixed(1), name: command.name })
-      );
-    }
-  }
-
-  timestamps.set(message.author.id, now);
-  setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
-
-  try {
-    command.execute(message, args);
-  } catch (error) {
-    console.error(error);
-    message.reply(i18n.__("common.errorCommend")).catch(console.error);
-  }
+  // Execute the command
+  const command = client.commands.get(commandName);
+  command.execute(message, args, serverPrefixes, PREFIX);
 });
+
+client.login(TOKEN);

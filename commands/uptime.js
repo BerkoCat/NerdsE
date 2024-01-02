@@ -17,8 +17,10 @@ module.exports = {
     minutes %= 60;
     hours %= 24;
 
+    const formattedUptime = `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+
     return message
-      .reply(i18n.__mf('uptime.result', {days: days, hours: hours, minutes: minutes, seconds: seconds}))
+      .reply(`🕒 Uptime: ${formattedUptime}`)
       .catch(console.error);
   }
 };

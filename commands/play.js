@@ -21,13 +21,11 @@ module.exports = {
     const serverQueue = message.client.queue.get(message.guild.id);
     if (!channel) return message.reply(i18n.__("play.errorNotChannel")).catch(console.error);
     if (serverQueue && channel !== message.guild.me.voice.channel)
-      return message
-        .reply(i18n.__mf("play.errorNotInSameChannel", { user: message.client.user }))
+      return message.reply(i18n.__mf("play.errorNotInSameChannel", { user: message.client.user }))
         .catch(console.error);
 
     if (!args.length)
-      return message
-        .reply(i18n.__mf("play.usageReply", { prefix: message.client.prefix }))
+      return message.reply(i18n.__mf("play.usageReply", { prefix: message.client.prefix }))
         .catch(console.error);
 
     const permissions = channel.permissionsFor(message.client.user);
@@ -42,29 +40,6 @@ module.exports = {
     const url = args[0];
     const urlValid = videoPattern.test(args[0]);
 
-    // Start the playlist if playlist url was provided
-    if (!videoPattern.test(args[0]) && playlistPattern.test(args[0])) {
-      return message.client.commands.get("playlist").execute(message, args);
-    } else if (scdl.isValidUrl(url) && url.includes("/sets/")) {
-      return message.client.commands.get("playlist").execute(message, args);
-    }
-
-    if (mobileScRegex.test(url)) {
-      try {
-        https.get(url, function (res) {
-          if (res.statusCode == "302") {
-            return message.client.commands.get("play").execute(message, [res.headers.location]);
-          } else {
-            return message.reply("No content could be found at that url.").catch(console.error);
-          }
-        });
-      } catch (error) {
-        console.error(error);
-        return message.reply(error.message).catch(console.error);
-      }
-      return message.reply("Following url redirection...").catch(console.error);
-    }
-
     const queueConstruct = {
       textChannel: message.channel,
       channel,
@@ -78,50 +53,43 @@ module.exports = {
     let songInfo = null;
     let song = null;
 
-    if (urlValid) {
-      try {
+    try {
+      if (urlValid) {
         songInfo = await ytdl.getInfo(url);
-        song = {
-          title: songInfo.videoDetails.title,
-          url: songInfo.videoDetails.video_url,
-          duration: songInfo.videoDetails.lengthSeconds
-        };
-      } catch (error) {
-        console.error(error);
-        return message.reply(error.message).catch(console.error);
-      }
-    } else if (scRegex.test(url)) {
-      try {
+      } else if (scRegex.test(url)) {
         const trackInfo = await scdl.getInfo(url, SOUNDCLOUD_CLIENT_ID);
-        song = {
-          title: trackInfo.title,
-          url: trackInfo.permalink_url,
-          duration: Math.ceil(trackInfo.duration / 1000)
+        songInfo = {
+          videoDetails: {
+            title: trackInfo.title,
+            video_url: trackInfo.permalink_url,
+            lengthSeconds: Math.ceil(trackInfo.duration / 1000)
+          }
         };
-      } catch (error) {
-        console.error(error);
-        return message.reply(error.message).catch(console.error);
-      }
-    } else {
-      try {
+      } else {
         const results = await youtube.searchVideos(search, 1, { part: "snippet" });
         songInfo = await ytdl.getInfo(results[0].url);
-        song = {
-          title: songInfo.videoDetails.title,
-          url: songInfo.videoDetails.video_url,
-          duration: songInfo.videoDetails.lengthSeconds
-        };
-      } catch (error) {
-        console.error(error);
-        return message.reply(error.message).catch(console.error);
       }
+
+      song = {
+        title: songInfo.videoDetails.title,
+        url: songInfo.videoDetails.video_url,
+        duration: songInfo.videoDetails.lengthSeconds
+      };
+    } catch (error) {
+      console.error(error);
+      return message.reply(error.message).catch(console.error);
     }
 
     if (serverQueue) {
       serverQueue.songs.push(song);
-      return serverQueue.textChannel
-        .send(i18n.__mf("play.queueAdded", { title: song.title, author: message.author }))
-        .catch(console.error);
+      const playAddedEmbed = new MessageEmbed()
+        .setColor("#3498db")
+        .setAuthor("Music Bot", "https://example.com/music-bot-icon.png")
+        .setTitle("Added to Queue 🎶")
+        .setDescription(`**[${song.title}](${song.url})**\nAdded by: ${message.author}`)
+        .setThumbnail("https://example.com/music-bot-thumbnail.png")
+        .setFooter("Enjoy the music!", "https://example.com/music-bot-footer.png");
+      return serverQueue.textChannel.send(playAddedEmbed).catch(console.error);
     }
 
     queueConstruct.songs.push(song);
@@ -135,7 +103,8 @@ module.exports = {
       console.error(error);
       message.client.queue.delete(message.guild.id);
       await channel.leave();
-      return message.channel.send(i18n.__('play.cantJoinChannel', {error: error})).catch(console.error);
+      return message.channel.send(i18n.__('play.cantJoinChannel', {error: error}))
+        .catch(console.error);
     }
   }
 };
