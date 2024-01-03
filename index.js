@@ -4,6 +4,7 @@ const { join } = require("path");
 const { TOKEN, PREFIX } = require("./util/EvobotUtil");
 const path = require("path");
 const i18n = require("i18n");
+const keep_alive = require('./keep_alive.js') //UPTIME
 
 const client = new Client({
   disableMentions: "everyone",
@@ -50,7 +51,7 @@ client.on("ready", () => {
   setInterval(() => {
     client.user.setActivity(statuses[index], { type: "PLAYING" });
     index = (index + 1) % statuses.length;
-  }, 9000);
+  }, 15000);
 });
 
 client.on("warn", (info) => console.log(info));

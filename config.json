@@ -1,13 +1,12 @@
 {
- "TOKEN": "ODYwMzY2ODY2MDI2MzMyMTYw.GelpQM.H6m_kCsrtLO7tvIjBphrAJVUZqdXRZ_ZirDoJ0" ,
-  "YOUTUBE_API_KEY": "",
+  "TOKEN": "ODYwMzY2ODY2MDI2MzMyMTYw.GelpQM.H6m_kCsrtLO7tvIjBphrAJVUZqdXRZ_ZirDoJ0" ,
+  "YOUTUBE_API_KEY": "AIzaSyCRh4Hg4lyZC2-c_Oa67cbspNUM-_gJugA",
   "SOUNDCLOUD_CLIENT_ID": "",
-  "BIO_TEXT": "Just playing with the code rn"
   "MAX_PLAYLIST_SIZE": 10,
   "PREFIX": "+",
   "LOCALE": "en",
   "support_server": "",
   "PRUNING": false,
-  "STAY_TIME": 30,
+  "STAY_TIME": 900,
   "DEFAULT_VOLUME": 100
 }
