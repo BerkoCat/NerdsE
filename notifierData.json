@@ -1,0 +1,44 @@
+{
+  "notifiers": {
+    "server_id_1": [
+      {
+        "channel": "channel_id_1",
+        "time": "Hh:mm"
+      },
+      {
+        "channel": "channel_id_2",
+        "time": "Hh:mm"
+      }
+    ],
+    "server_id_2": [
+      {
+        "channel": "channel_id_3",
+        "time": "Hh:mm"
+      },
+      {
+        "channel": "channel_id_4",
+        "time": "Hh:mm"
+      }
+    ]
+  },
+  "897376386585616444": [
+    {
+      "channel": "1191765832821383168",
+      "time": "11:45"
+    },
+    {
+      "channel": "1191391141317328987",
+      "time": "23:47"
+    },
+    {
+      "channel": "1191391141317328987",
+      "time": "23:49"
+    }
+  ],
+  "1138760534003548230": [
+    {
+      "channel": "1194630519829303346",
+      "time": "20:00"
+    }
+  ]
+}
