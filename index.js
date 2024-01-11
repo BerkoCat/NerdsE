@@ -51,7 +51,11 @@ client.on("ready", () => {
   setInterval(() => {
     client.user.setActivity(statuses[index], { type: "PLAYING" });
     index = (index + 1) % statuses.length;
+<<<<<<< HEAD
   }, 15000);
+=======
+  }, 9000);
+>>>>>>> bc5da24c0e258893db6ed0e94ba585bdf35fbd20
 });
 
 client.on("warn", (info) => console.log(info));
