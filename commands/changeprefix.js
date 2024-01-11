@@ -1,10 +1,8 @@
 module.exports = {
   name: 'changeprefix',
   description: 'Change the bot\'s prefix for this server',
-<<<<<<< HEAD
   aliases: ["cp"],
-=======
->>>>>>> bc5da24c0e258893db6ed0e94ba585bdf35fbd20
+
   execute(message, args, serverPrefixes, DEFAULT_PREFIX) {
     if (!message.member.permissions.has('ADMINISTRATOR')) {
       return message.reply('You do not have the required permissions to use this command.');
